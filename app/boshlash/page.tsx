@@ -209,24 +209,27 @@ function Step3({ data, onChange }: { data: FormData; onChange: (k: keyof FormDat
 
 // ── Step 4: Tarif ──────────────────────────────────────────────────────────
 function Step4({ data, onChange }: { data: FormData; onChange: (k: keyof FormData, v: string) => void }) {
-  const plans: { id: FormData["plan"]; name: string; price: string; badge?: string; highlight: boolean; features: string[] }[] = [
+  const plans: { id: FormData["plan"]; name: string; price: string; badge?: string; trialBadge?: string; trial: string; highlight: boolean; features: string[] }[] = [
     {
-      id: "starter", name: "Starter", price: "299 000 so'm/oy", highlight: false,
+      id: "starter", name: "Starter", price: "299 000 so'm/oy",
+      trialBadge: "🕐 14 kun sinov", trial: "14 kun bepul sinov", highlight: false,
       features: ["Website (1 til)", "Bemorlar CRM", "Navbat jadvali", "Telegram bot", "3 xodim"],
     },
     {
-      id: "pro", name: "Pro", price: "599 000 so'm/oy", badge: "⭐ Ommabop", highlight: true,
+      id: "pro", name: "Pro", price: "599 000 so'm/oy",
+      badge: "⭐ Ommabop", trialBadge: "⚡ Tezkor sinov", trial: "7 kun bepul sinov", highlight: true,
       features: ["Website (3 til)", "Cheksiz bemorlar", "AI tibbiy PDF", "SMS eslatmalar", "Cheksiz xodim", "Hisobotlar"],
     },
     {
-      id: "enterprise", name: "Enterprise", price: "Muzokarali", highlight: false,
+      id: "enterprise", name: "Enterprise", price: "Muzokarali",
+      trial: "Demo so'rash", highlight: false,
       features: ["Multi-filial", "Custom domen", "API integratsiya", "24/7 qo'llab-quvvatlash"],
     },
   ];
   return (
     <div className="space-y-4">
-      <p className="text-sm mb-6" style={{ color: "#7A9990" }}>14 kun bepul sinov. Karta talab etilmaydi.</p>
-      {plans.map(({ id, name, price, badge, highlight, features }) => (
+      <p className="text-sm mb-6" style={{ color: "#7A9990" }}>Starter — 14 kun &nbsp;•&nbsp; Pro — 7 kun &nbsp;•&nbsp; Karta talab etilmaydi.</p>
+      {plans.map(({ id, name, price, badge, trialBadge, trial, highlight, features }) => (
         <button key={id} onClick={() => onChange("plan", id!)}
           className="w-full text-left p-4 rounded-2xl transition-all border"
           style={{
@@ -234,16 +237,18 @@ function Step4({ data, onChange }: { data: FormData; onChange: (k: keyof FormDat
             borderColor: data.plan === id ? "rgba(62,207,178,0.5)" : highlight ? "rgba(62,207,178,0.2)" : "rgba(62,207,178,0.1)",
             boxShadow: data.plan === id ? "0 0 20px rgba(62,207,178,0.08)" : "none",
           }}>
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${data.plan === id ? "border-[#3ECFB2]" : "border-[#4a6e64]"}`}>
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ${data.plan === id ? "border-[#3ECFB2]" : "border-[#4a6e64]"}`}>
                 {data.plan === id && <div className="w-2 h-2 rounded-full" style={{ background: "#3ECFB2" }} />}
               </div>
               <span className="font-bold" style={{ color: "#F0F5F3" }}>{name}</span>
               {badge && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(62,207,178,0.2)", color: "#3ECFB2" }}>{badge}</span>}
+              {trialBadge && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: highlight ? "rgba(124,58,237,0.15)" : "rgba(62,207,178,0.08)", color: highlight ? "#a78bfa" : "#3ECFB2", border: `1px solid ${highlight ? "rgba(124,58,237,0.25)" : "rgba(62,207,178,0.15)"}` }}>{trialBadge}</span>}
             </div>
-            <span className="text-sm font-semibold" style={{ color: data.plan === id ? "#3ECFB2" : "#7A9990" }}>{price}</span>
+            <span className="text-sm font-semibold shrink-0" style={{ color: data.plan === id ? "#3ECFB2" : "#7A9990" }}>{price}</span>
           </div>
+          <p className="text-[11px] ml-6 mb-2 font-medium" style={{ color: highlight ? "#a78bfa" : "#3ECFB2" }}>{trial}</p>
           <div className="flex flex-wrap gap-x-4 gap-y-1 ml-6">
             {features.map((f) => (
               <span key={f} className="text-xs flex items-center gap-1" style={{ color: "#7A9990" }}>
@@ -349,7 +354,7 @@ export default function BoshlashPage() {
     "Klinikangiz haqida asosiy ma'lumotlar",
     "Tizimga kirish uchun akkaunt",
     "Sizning manzil dentaflow.uz da",
-    "14 kun bepul. Istalgan vaqt o'zgartirish mumkin.",
+    "Starter — 14 kun, Pro — 7 kun bepul sinov. Istalgan vaqt o'zgartirish mumkin.",
     "",
   ];
 

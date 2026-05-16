@@ -153,7 +153,7 @@ function Hero() {
         <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}
           className="text-lg sm:text-xl mb-10 max-w-2xl mx-auto" style={{ color: "#7A9990" }}>
           Bemorlar, navbatlar, to&apos;lovlar, AI hujjatlar — hammasi bir joyda.
-          <br /><span style={{ color: "#F0F5F3" }}>14 kun bepul sinab ko&apos;ring.</span>
+          <br /><span style={{ color: "#F0F5F3" }}>Starter — 14 kun &nbsp;•&nbsp; Pro — 7 kun bepul sinov.</span>
         </motion.p>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
@@ -335,7 +335,8 @@ function Pricing() {
   const plans = [
     {
       name: "Starter", price: "299 000", period: "so'm/oy",
-      desc: "Kichik klinikalar uchun", badge: null, highlight: false,
+      desc: "Kichik klinikalar uchun", badge: null, trialBadge: "🕐 14 kun sinov", highlight: false,
+      trial: "14 kun bepul sinov", cta: "Bepul boshlash →",
       features: [
         { t: "Website (1 til)", ok: true }, { t: "Bemorlar CRM (500 ta)", ok: true },
         { t: "Navbat jadvali", ok: true }, { t: "Telegram bot", ok: true },
@@ -345,7 +346,8 @@ function Pricing() {
     },
     {
       name: "Pro", price: "599 000", period: "so'm/oy",
-      desc: "O'sib borayotgan klinikalar", badge: "⭐ Tavsiya etiladi", highlight: true,
+      desc: "O'sib borayotgan klinikalar", badge: "⭐ Tavsiya etiladi", trialBadge: "⚡ Tezkor sinov", highlight: true,
+      trial: "7 kun bepul sinov", cta: "Bepul boshlash →",
       features: [
         { t: "Website (3 til)", ok: true }, { t: "Cheksiz bemorlar", ok: true },
         { t: "To'liq Workplace", ok: true }, { t: "AI tibbiy PDF", ok: true },
@@ -355,7 +357,8 @@ function Pricing() {
     },
     {
       name: "Enterprise", price: "Muzokarali", period: "",
-      desc: "Ko'p filial, yirik klinikalar", badge: null, highlight: false,
+      desc: "Ko'p filial, yirik klinikalar", badge: null, trialBadge: null, highlight: false,
+      trial: "Demo so'rash", cta: "Demo so'rash →",
       features: [
         { t: "Barcha Pro xususiyatlar", ok: true }, { t: "Multi-filial", ok: true },
         { t: "Custom domen", ok: true }, { t: "API integratsiya", ok: true },
@@ -370,10 +373,10 @@ function Pricing() {
         <FadeIn className="text-center mb-14">
           <p className="text-sm font-semibold uppercase tracking-widest mb-3" style={{ color: "#3ECFB2" }}>Tariflar</p>
           <h2 className="text-3xl sm:text-4xl font-bold mb-4" style={{ color: "#F0F5F3" }}>Sizga mos tarifni tanlang</h2>
-          <p style={{ color: "#7A9990" }}>Barcha tariflar 14 kun bepul sinov bilan keladi.</p>
+          <p style={{ color: "#7A9990" }}>Starter — 14 kun &nbsp;•&nbsp; Pro — 7 kun &nbsp;•&nbsp; Karta shart emas</p>
         </FadeIn>
         <div className="grid sm:grid-cols-3 gap-5 items-stretch">
-          {plans.map(({ name, price, period, desc, badge, highlight, features }, i) => (
+          {plans.map(({ name, price, period, desc, badge, trialBadge, trial, cta, highlight, features }, i) => (
             <FadeIn key={name} delay={i * 0.1}>
               <motion.div whileHover={{ y: -6 }} className="relative rounded-2xl p-6 h-full flex flex-col"
                 style={{
@@ -389,8 +392,17 @@ function Pricing() {
                   </div>
                 )}
                 <div className="mb-5">
-                  <h3 className="font-bold text-lg mb-1" style={{ color: "#F0F5F3" }}>{name}</h3>
-                  <p className="text-xs mb-4" style={{ color: "#7A9990" }}>{desc}</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-bold text-lg" style={{ color: "#F0F5F3" }}>{name}</h3>
+                    {trialBadge && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap"
+                        style={{ background: highlight ? "rgba(124,58,237,0.2)" : "rgba(62,207,178,0.1)", color: highlight ? "#a78bfa" : "#3ECFB2", border: `1px solid ${highlight ? "rgba(124,58,237,0.3)" : "rgba(62,207,178,0.2)"}` }}>
+                        {trialBadge}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs mb-1" style={{ color: "#7A9990" }}>{desc}</p>
+                  <p className="text-xs mb-3 font-medium" style={{ color: highlight ? "#a78bfa" : "#3ECFB2" }}>{trial}</p>
                   <div className="flex items-end gap-1">
                     <span className="text-3xl font-bold" style={{ color: highlight ? "#3ECFB2" : "#F0F5F3" }}>{price}</span>
                     {period && <span className="text-sm mb-1" style={{ color: "#7A9990" }}>{period}</span>}
@@ -410,7 +422,7 @@ function Pricing() {
                   style={highlight
                     ? { background: "#3ECFB2", color: "#050D0A" }
                     : { background: "rgba(62,207,178,0.1)", color: "#3ECFB2", border: "1px solid rgba(62,207,178,0.25)" }}>
-                  {name === "Enterprise" ? "Bog'lanish →" : "Bepul boshlash →"}
+                  {cta}
                 </Link>
               </motion.div>
             </FadeIn>
@@ -418,7 +430,7 @@ function Pricing() {
         </div>
         <FadeIn>
           <p className="text-center mt-8 text-sm" style={{ color: "#7A9990" }}>
-            ✅ 14 kun bepul sinov &nbsp;•&nbsp; Karta shart emas &nbsp;•&nbsp; Istalgan vaqt bekor qilish
+            ✅ Starter — 14 kun &nbsp;•&nbsp; Pro — 7 kun &nbsp;•&nbsp; Karta shart emas &nbsp;•&nbsp; Istalgan vaqt bekor qilish
           </p>
         </FadeIn>
       </div>
@@ -519,7 +531,7 @@ function CTA() {
             <div className="relative">
               <div className="text-5xl mb-4">🚀</div>
               <h2 className="text-3xl sm:text-4xl font-bold mb-4" style={{ color: "#F0F5F3" }}>
-                Bugun boshlang — 14 kun bepul
+                Bugun boshlang — bepul sinov
               </h2>
               <p className="mb-8 text-lg" style={{ color: "#7A9990" }}>
                 O&apos;zbekistondagi yuzlab klinikalar DentaFlow bilan ishlayapti. Siz ham qo&apos;shiling.
