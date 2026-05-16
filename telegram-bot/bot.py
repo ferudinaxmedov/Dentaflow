@@ -248,7 +248,9 @@ async def question_receive(message: Message, state: FSMContext) -> None:
 async def contact(message: Message) -> None:
     await message.answer(
         "📞 Biz bilan bog'laning:\n\n"
-        "✈️ Telegram: @RUZIEVNA\n"
+        "✈️ Telegram: @dentaflow_uz\n"
+        "📱 Instagram: @dentaflow.uz\n"
+        "📞 Telefon: +998 94 305 03 03\n"
         "📧 Email: info@dentaflow.uz\n"
         "🌐 Website: dentaflow.uz\n\n"
         "Ish vaqti: Du-Sh 09:00-18:00",
