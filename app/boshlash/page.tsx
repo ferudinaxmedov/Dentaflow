@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ArrowLeft, Check, Eye, EyeOff, Sparkles, Copy } from "lucide-react";
+import { ArrowRight, ArrowLeft, Check, Eye, EyeOff, Sparkles, Copy, Loader2, AlertCircle, X } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface FormData {
@@ -87,7 +87,7 @@ function Step2({ data, onChange }: { data: FormData; onChange: (k: keyof FormDat
   return (
     <div className="space-y-5">
       <div>
-        <label className={labelCls}>To'liq ism</label>
+        <label className={labelCls}>To&apos;liq ism</label>
         <input className={inputCls} value={data.fullName} placeholder="Hamida Nazarova"
           onChange={(e) => onChange("fullName", e.target.value)} />
       </div>
@@ -137,18 +137,28 @@ function Step2({ data, onChange }: { data: FormData; onChange: (k: keyof FormDat
 
 // ── Step 3: Subdomain ──────────────────────────────────────────────────────
 function Step3({ data, onChange }: { data: FormData; onChange: (k: keyof FormData, v: string) => void }) {
-  const [checking, setChecking] = useState(false);
+  const [checking,  setChecking ] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
   const suggested = toSlug(data.clinicName) || "mening-klinikam";
 
   useEffect(() => {
-    if (!data.subdomain) return;
+    if (!data.subdomain || data.subdomain.length < 3) {
+      setAvailable(null);
+      return;
+    }
     setChecking(true);
     setAvailable(null);
-    const t = setTimeout(() => {
-      setChecking(false);
-      setAvailable(data.subdomain.length >= 3 && data.subdomain !== "admin" && data.subdomain !== "test");
-    }, 700);
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/onboarding/check-slug?slug=${encodeURIComponent(data.subdomain)}`);
+        const result = await res.json() as { available: boolean };
+        setAvailable(result.available);
+      } catch {
+        setAvailable(null);
+      } finally {
+        setChecking(false);
+      }
+    }, 500);
     return () => clearTimeout(t);
   }, [data.subdomain]);
 
@@ -163,17 +173,18 @@ function Step3({ data, onChange }: { data: FormData; onChange: (k: keyof FormDat
             value={data.subdomain} placeholder={suggested}
             onChange={(e) => onChange("subdomain", toSlug(e.target.value))}
           />
-          <div className="px-3 py-3 shrink-0 text-sm font-medium border-l" style={{ borderColor: "rgba(62,207,178,0.15)", background: "rgba(62,207,178,0.05)", color: "#7A9990" }}>
+          <div className="px-3 py-3 shrink-0 text-sm font-medium border-l"
+            style={{ borderColor: "rgba(62,207,178,0.15)", background: "rgba(62,207,178,0.05)", color: "#7A9990" }}>
             .dentaflow.uz
           </div>
         </div>
-        <div className="mt-2 flex items-center gap-2 text-xs">
-          {checking && <span style={{ color: "#7A9990" }}>Tekshirilmoqda…</span>}
-          {!checking && available === true && <><Check size={12} style={{ color: "#3ECFB2" }} /><span style={{ color: "#3ECFB2" }}>Bo&apos;sh — ajoyib!</span></>}
-          {!checking && available === false && <span style={{ color: "#ef4444" }}>Bu nom band. Boshqasini sinab ko&apos;ring.</span>}
+        <div className="mt-2 flex items-center gap-2 text-xs min-h-[20px]">
+          {checking && <><Loader2 size={12} className="animate-spin" style={{ color: "#7A9990" }} /><span style={{ color: "#7A9990" }}>Tekshirilmoqda…</span></>}
+          {!checking && available === true  && <><Check size={12} style={{ color: "#3ECFB2" }} /><span style={{ color: "#3ECFB2" }}>Bo&apos;sh — ajoyib!</span></>}
+          {!checking && available === false && <><X size={12} style={{ color: "#ef4444" }} /><span style={{ color: "#ef4444" }}>Bu nom band. Boshqasini sinab ko&apos;ring.</span></>}
         </div>
       </div>
-      {/* Suggestions */}
+
       <div>
         <p className="text-xs mb-2" style={{ color: "#7A9990" }}>Taklif etiladi:</p>
         <div className="flex flex-wrap gap-2">
@@ -182,20 +193,21 @@ function Step3({ data, onChange }: { data: FormData; onChange: (k: keyof FormDat
               className="px-3 py-1.5 rounded-lg text-xs border transition-all hover:scale-105"
               style={{
                 borderColor: data.subdomain === s ? "rgba(62,207,178,0.5)" : "rgba(62,207,178,0.15)",
-                background: data.subdomain === s ? "rgba(62,207,178,0.1)" : "transparent",
-                color: data.subdomain === s ? "#3ECFB2" : "#7A9990",
+                background:  data.subdomain === s ? "rgba(62,207,178,0.1)" : "transparent",
+                color:       data.subdomain === s ? "#3ECFB2" : "#7A9990",
               }}>
               {s}
             </button>
           ))}
         </div>
       </div>
-      {/* Preview */}
+
       {data.subdomain && (
-        <div className="flex items-center gap-3 p-4 rounded-xl" style={{ background: "rgba(62,207,178,0.05)", border: "1px solid rgba(62,207,178,0.1)" }}>
+        <div className="flex items-center gap-3 p-4 rounded-xl"
+          style={{ background: "rgba(62,207,178,0.05)", border: "1px solid rgba(62,207,178,0.1)" }}>
           <span className="text-sm" style={{ color: "#F0F5F3" }}>🌐</span>
           <span className="text-sm font-mono flex-1" style={{ color: "#3ECFB2" }}>
-            https://{data.subdomain || "klinikangiz"}.dentaflow.uz
+            https://{data.subdomain}.dentaflow.uz
           </span>
           <button onClick={() => navigator.clipboard.writeText(`https://${data.subdomain}.dentaflow.uz`)}
             className="p-1.5 rounded-lg hover:bg-[rgba(62,207,178,0.1)] transition-colors" style={{ color: "#7A9990" }}>
@@ -228,14 +240,16 @@ function Step4({ data, onChange }: { data: FormData; onChange: (k: keyof FormDat
   ];
   return (
     <div className="space-y-4">
-      <p className="text-sm mb-6" style={{ color: "#7A9990" }}>Starter — 14 kun &nbsp;•&nbsp; Pro — 7 kun &nbsp;•&nbsp; Karta talab etilmaydi.</p>
+      <p className="text-sm mb-6" style={{ color: "#7A9990" }}>
+        Starter — 14 kun &nbsp;•&nbsp; Pro — 7 kun &nbsp;•&nbsp; Karta talab etilmaydi.
+      </p>
       {plans.map(({ id, name, price, badge, trialBadge, trial, highlight, features }) => (
         <button key={id} onClick={() => onChange("plan", id!)}
           className="w-full text-left p-4 rounded-2xl transition-all border"
           style={{
-            background: data.plan === id ? "rgba(62,207,178,0.08)" : "rgba(0,0,0,0.2)",
+            background:  data.plan === id ? "rgba(62,207,178,0.08)" : "rgba(0,0,0,0.2)",
             borderColor: data.plan === id ? "rgba(62,207,178,0.5)" : highlight ? "rgba(62,207,178,0.2)" : "rgba(62,207,178,0.1)",
-            boxShadow: data.plan === id ? "0 0 20px rgba(62,207,178,0.08)" : "none",
+            boxShadow:   data.plan === id ? "0 0 20px rgba(62,207,178,0.08)" : "none",
           }}>
           <div className="flex items-center justify-between mb-1.5">
             <div className="flex items-center gap-2 flex-wrap">
@@ -243,7 +257,7 @@ function Step4({ data, onChange }: { data: FormData; onChange: (k: keyof FormDat
                 {data.plan === id && <div className="w-2 h-2 rounded-full" style={{ background: "#3ECFB2" }} />}
               </div>
               <span className="font-bold" style={{ color: "#F0F5F3" }}>{name}</span>
-              {badge && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(62,207,178,0.2)", color: "#3ECFB2" }}>{badge}</span>}
+              {badge     && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(62,207,178,0.2)", color: "#3ECFB2" }}>{badge}</span>}
               {trialBadge && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: highlight ? "rgba(124,58,237,0.15)" : "rgba(62,207,178,0.08)", color: highlight ? "#a78bfa" : "#3ECFB2", border: `1px solid ${highlight ? "rgba(124,58,237,0.25)" : "rgba(62,207,178,0.15)"}` }}>{trialBadge}</span>}
             </div>
             <span className="text-sm font-semibold shrink-0" style={{ color: data.plan === id ? "#3ECFB2" : "#7A9990" }}>{price}</span>
@@ -263,25 +277,23 @@ function Step4({ data, onChange }: { data: FormData; onChange: (k: keyof FormDat
 }
 
 // ── Step 5: Success ────────────────────────────────────────────────────────
-function Step5({ data }: { data: FormData }) {
+function Step5({ data, clinicUrl }: { data: FormData; clinicUrl: string }) {
   const [copied, setCopied] = useState(false);
-  const url = `https://${data.subdomain || "klinikangiz"}.dentaflow.uz`;
+  const url = clinicUrl || `https://${data.subdomain || "klinikangiz"}.dentaflow.uz`;
   const copy = () => { navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 2000); };
   return (
     <div className="text-center space-y-6">
       <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", bounce: 0.5, delay: 0.1 }}
         className="text-7xl">🎉</motion.div>
       <div>
-        <h3 className="text-2xl font-bold mb-2" style={{ color: "#F0F5F3" }}>
-          Klinikangiz tayyor!
-        </h3>
+        <h3 className="text-2xl font-bold mb-2" style={{ color: "#F0F5F3" }}>Klinikangiz tayyor!</h3>
         <p style={{ color: "#7A9990" }}>
           {data.clinicName || "Klinikangiz"} tizimga muvaffaqiyatli qo&apos;shildi.
         </p>
       </div>
       <div className="flex items-center gap-2 p-4 rounded-xl text-left"
         style={{ background: "rgba(62,207,178,0.05)", border: "1px solid rgba(62,207,178,0.15)" }}>
-        <span className="font-mono text-sm flex-1" style={{ color: "#3ECFB2" }}>{url}</span>
+        <span className="font-mono text-sm flex-1 break-all" style={{ color: "#3ECFB2" }}>{url}</span>
         <button onClick={copy} className="p-1.5 rounded-lg transition-colors hover:bg-[rgba(62,207,178,0.1)]" style={{ color: "#7A9990" }}>
           {copied ? <Check size={14} style={{ color: "#3ECFB2" }} /> : <Copy size={14} />}
         </button>
@@ -307,7 +319,11 @@ function Step5({ data }: { data: FormData }) {
 
 // ── PAGE ───────────────────────────────────────────────────────────────────
 export default function BoshlashPage() {
-  const [step, setStep] = useState(0);
+  const [step,        setStep       ] = useState(0);
+  const [submitting,  setSubmitting  ] = useState(false);
+  const [submitError, setSubmitError ] = useState("");
+  const [clinicUrl,   setClinicUrl   ] = useState("");
+
   const [form, setForm] = useState<FormData>({
     clinicName: "", phone: "", city: "", hours: "",
     fullName: "", email: "", password: "", confirmPassword: "",
@@ -317,9 +333,7 @@ export default function BoshlashPage() {
   function onChange(key: keyof FormData, value: string) {
     setForm((f) => {
       const next = { ...f, [key]: value };
-      if (key === "clinicName" && !f.subdomain) {
-        next.subdomain = toSlug(value);
-      }
+      if (key === "clinicName" && !f.subdomain) next.subdomain = toSlug(value);
       return next;
     });
   }
@@ -332,7 +346,44 @@ export default function BoshlashPage() {
     return true;
   }
 
-  function next() { if (canNext() && step < 4) setStep(step + 1); }
+  async function handleSubmit() {
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const res = await fetch("/api/onboarding/register", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clinic_name:   form.clinicName,
+          phone:         form.phone,
+          city:          form.city,
+          working_hours: form.hours,
+          full_name:     form.fullName,
+          email:         form.email,
+          password:      form.password,
+          slug:          form.subdomain,
+          plan:          form.plan,
+        }),
+      });
+      const data = await res.json() as { success?: boolean; clinic_url?: string; error?: string };
+      if (!res.ok || !data.success) {
+        setSubmitError(data.error ?? "Xatolik yuz berdi. Qayta urinib ko'ring.");
+        return;
+      }
+      setClinicUrl(data.clinic_url ?? `https://${form.subdomain}.dentaflow.uz`);
+      setStep(4);
+    } catch {
+      setSubmitError("Tarmoq xatosi. Internet aloqangizni tekshiring.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function next() {
+    if (!canNext()) return;
+    if (step === 3) { handleSubmit(); return; }
+    if (step < 4) setStep(step + 1);
+  }
   function back() { if (step > 0) setStep(step - 1); }
 
   const stepsContent = [
@@ -340,17 +391,11 @@ export default function BoshlashPage() {
     <Step2 key={1} data={form} onChange={onChange} />,
     <Step3 key={2} data={form} onChange={onChange} />,
     <Step4 key={3} data={form} onChange={onChange} />,
-    <Step5 key={4} data={form} />,
+    <Step5 key={4} data={form} clinicUrl={clinicUrl} />,
   ];
 
-  const stepTitles = [
-    "Klinika haqida",
-    "Admin akkaunt yarating",
-    "Subdomen tanlang",
-    "Tarif tanlang",
-    "Tayyor! 🎉",
-  ];
-  const stepSubs = [
+  const stepTitles = ["Klinika haqida", "Admin akkaunt yarating", "Subdomen tanlang", "Tarif tanlang", "Tayyor! 🎉"];
+  const stepSubs   = [
     "Klinikangiz haqida asosiy ma'lumotlar",
     "Tizimga kirish uchun akkaunt",
     "Sizning manzil dentaflow.uz da",
@@ -361,7 +406,6 @@ export default function BoshlashPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-5 py-16 relative"
       style={{ background: "#050D0A" }}>
-      {/* BG gradient */}
       <div className="fixed top-0 left-0 w-full h-full pointer-events-none"
         style={{ background: "radial-gradient(ellipse at 30% 20%, rgba(62,207,178,0.05) 0%, transparent 60%), radial-gradient(ellipse at 70% 80%, rgba(124,58,237,0.06) 0%, transparent 60%)" }} />
 
@@ -380,7 +424,6 @@ export default function BoshlashPage() {
 
           <StepBar step={step} />
 
-          {/* Title */}
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-1">
               <Sparkles size={16} style={{ color: "#3ECFB2" }} />
@@ -389,7 +432,6 @@ export default function BoshlashPage() {
             {stepSubs[step] && <p className="text-sm" style={{ color: "#7A9990" }}>{stepSubs[step]}</p>}
           </div>
 
-          {/* Step content */}
           <AnimatePresence mode="wait">
             <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.25 }}>
@@ -397,11 +439,21 @@ export default function BoshlashPage() {
             </motion.div>
           </AnimatePresence>
 
+          {/* Submit error */}
+          {submitError && (
+            <div className="mt-4 flex items-start gap-2 p-3 rounded-xl"
+              style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
+              <AlertCircle size={15} className="shrink-0 mt-0.5" style={{ color: "#ef4444" }} />
+              <p className="text-xs" style={{ color: "#ef4444" }}>{submitError}</p>
+            </div>
+          )}
+
           {/* Navigation */}
           {step < 4 && (
             <div className="flex items-center justify-between mt-8">
               {step > 0 ? (
-                <button onClick={back} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm transition-colors hover:bg-[rgba(255,255,255,0.05)]"
+                <button onClick={back} disabled={submitting}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm transition-colors hover:bg-[rgba(255,255,255,0.05)] disabled:opacity-40"
                   style={{ color: "#7A9990" }}>
                   <ArrowLeft size={16} /> Orqaga
                 </button>
@@ -411,16 +463,18 @@ export default function BoshlashPage() {
                   <ArrowLeft size={16} /> Ortga
                 </Link>
               )}
-              <button onClick={next} disabled={!canNext()}
+              <button onClick={next} disabled={!canNext() || submitting}
                 className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
                 style={{ background: "#3ECFB2", color: "#050D0A" }}>
-                {step === 3 ? "Yakunlash" : "Davom etish"} <ArrowRight size={16} />
+                {submitting
+                  ? <><Loader2 size={15} className="animate-spin" /> Ro&apos;yxatdan o&apos;tilmoqda…</>
+                  : <>{step === 3 ? "Yakunlash" : "Davom etish"} <ArrowRight size={16} /></>
+                }
               </button>
             </div>
           )}
         </div>
 
-        {/* Footer note */}
         {step === 0 && (
           <p className="text-center mt-4 text-xs" style={{ color: "#4a6e64" }}>
             Allaqachon hisobingiz bormi?{" "}
