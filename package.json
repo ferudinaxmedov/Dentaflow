@@ -9,9 +9,6 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.4",
-    "@tsparticles/engine": "^4.0.2",
-    "@tsparticles/react": "^4.0.2",
-    "@tsparticles/slim": "^4.0.2",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.16.0",
