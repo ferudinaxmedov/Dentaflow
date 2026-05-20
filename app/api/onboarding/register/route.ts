@@ -1,7 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { seedNewClinic } from "@/lib/seed-clinic";
-import { sendWelcomeEmail } from "@/lib/send-email";
 
 interface RegisterBody {
   clinic_name:   string;
@@ -116,7 +115,21 @@ export async function POST(request: NextRequest) {
   }
 
   // ── 7. Welcome email ───────────────────────────────────────────────────────
-  await sendWelcomeEmail({ to: email, clinicName: clinic_name, slug, adminName: full_name, plan });
+  try {
+    await fetch('https://hamidastom.uz/api/onboarding/welcome-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: email,
+        clinicName: clinic_name,
+        slug,
+        adminName: full_name,
+        plan
+      })
+    })
+  } catch(e) {
+    console.error('Email error:', e)
+  }
 
   return NextResponse.json({
     success:    true,
