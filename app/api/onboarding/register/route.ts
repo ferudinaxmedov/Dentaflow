@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { seedNewClinic } from "@/lib/seed-clinic";
-import { sendWelcomeEmail } from "@/lib/send-welcome-email";
+import { sendWelcomeEmail } from "@/lib/send-email";
 
 interface RegisterBody {
   clinic_name:   string;
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
   }
 
   // ── 7. Welcome email ───────────────────────────────────────────────────────
-  await sendWelcomeEmail(email, slug, clinic_name);
+  await sendWelcomeEmail({ to: email, clinicName: clinic_name, slug, adminName: full_name, plan });
 
   return NextResponse.json({
     success:    true,
